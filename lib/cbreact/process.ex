@@ -6,12 +6,15 @@ defmodule Cbreact.Process do
     GenServer.start_link(__MODULE__, {guid, segment_id, range, sessionid})
   end
 
-  def init({guid, segment_id, range, sessionid}) do
+  def init({guid, segment_id, [startdate, enddate], sessionid}) do
+    starttime = Timex.Parse.DateTime.Parser.parse(startdate<>"Z", "{ISOz}")
+    endtime = Timex.Parse.DateTime.Parser.parse(enddate<>"Z", "{ISOz}")
+    
     state = HashDict.new
             |> HashDict.put(:cbclientapi, struct(Cbclientapi, Application.get_env(:cbclientapi, Cbclientapi))) 
             |> HashDict.put(:guid, guid)
             |> HashDict.put(:segment_id, segment_id)
-            |> HashDict.put(:range, range)
+            |> HashDict.put(:range, [starttime, endtime])
             |> HashDict.put(:status, :pending)
             |> HashDict.put(:sessionid, sessionid)
     {:ok, state}
@@ -47,26 +50,38 @@ defmodule Cbreact.Process do
   end
   def handle_info({:hackney_response, ref, :done}, state) do
     %{"process" => process} = JSX.decode!(state[:json])
-    process
+    newstate = process
     |> extract_modloads(state)
     :gproc.reg({:p, :l, state[:sessionid]}, {state[:guid], state[:segment_id]})
 
-    {:noreply, state}
+    {:noreply, newstate}
   end
 
   def extract_modloads(%{"modload_count" => modload_count, "modload_complete" => modload_complete}, state) do
 #    Logger.debug(modload_count)
-    Enum.map(modload_complete, &(process_modload_line(&1, state)))
-
-    HashDict.put(state, :modload_count_full, modload_count)
+    Enum.reduce(modload_complete, state, fn(x, acc) -> process_modload_line(x, acc) end)
+    |> HashDict.put(:modload_count_full, modload_count)
   end
   def extract_modloads(%{"modload_count" => modload_count}, state) do
     Logger.debug(modload_count)
   end
 
   def process_modload_line(string, state) do
-#    Logger.debug(string)
-    state
+    [datetime, md5, file] = String.split(string, "|")
+    [starttime, endtime] = state[:range]
+    eventtime = Timex.Parse.DateTime.Parser.parse(datetime<>"Z", "{ISOz}")
+
+    ds = HashDict.get(state, :eventlist, HashDict.new)
+    newds =
+    case {(eventtime > starttime), (eventtime < endtime), HashDict.get(ds, datetime, [])} do
+      {true, true, []} -> [ {:modload, md5, file} ]
+      {true, true, pds} -> [ {:modload, md5, file} | pds ]
+      {_   , _   , pds} -> pds
+    end
+
+    newdsx = HashDict.put(ds, datetime, newds)
+    Logger.debug(inspect(newdsx))
+    newstate = HashDict.put(state, :eventlist, newdsx)
   end
 
 
