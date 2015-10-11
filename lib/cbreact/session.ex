@@ -186,6 +186,7 @@ defmodule Cbreact.Session do
 
     :ets.new(sessionid, [:set, :protected, :named_table])
     :ets.new(set2bag(sessionid), [:bag, :protected, :named_table])
+    :ets.new(set2events(sessionid), [:bag, :public, :named_table])
     :ets.insert(sessionid, {:childproc_count, 0})
     :ets.insert(sessionid, {:crossproc_count, 0})
     :ets.insert(sessionid, {:filemod_count, 0})
@@ -198,6 +199,7 @@ defmodule Cbreact.Session do
       |> HashDict.put(:sensorid, sensorid)
       |> HashDict.put(:sessionid, sessionid)
       |> HashDict.put(:sessionidbag, set2bag(sessionid))
+      |> HashDict.put(:sessionidevents, set2events(sessionid))
       |> HashDict.put(:range, ["2015-01-01 00:00:00", "2015-01-01 00:00:00"])
       |> HashDict.put(:cbclientapi, struct(Cbclientapi, Application.get_env(:cbclientapi, Cbclientapi)))
 
@@ -248,6 +250,10 @@ defmodule Cbreact.Session do
 
   def set2bag(setatom) do
     Atom.to_string(setatom) <> "bag"
+    |> String.to_atom
+  end
+  def set2events(setatom) do
+    Atom.to_string(setatom) <> "events"
     |> String.to_atom
   end
 

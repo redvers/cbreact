@@ -9,7 +9,7 @@ defmodule Cbreact.Process do
   def init({guid, segment_id, [startdate, enddate], sessionid}) do
     starttime = Timex.Parse.DateTime.Parser.parse(startdate<>"Z", "{ISOz}")
     endtime = Timex.Parse.DateTime.Parser.parse(enddate<>"Z", "{ISOz}")
-    
+
     state = HashDict.new
             |> HashDict.put(:cbclientapi, struct(Cbclientapi, Application.get_env(:cbclientapi, Cbclientapi))) 
             |> HashDict.put(:guid, guid)
@@ -17,6 +17,7 @@ defmodule Cbreact.Process do
             |> HashDict.put(:range, [starttime, endtime])
             |> HashDict.put(:status, :pending)
             |> HashDict.put(:sessionid, sessionid)
+            |> HashDict.put(:sessionidevents, set2events(sessionid))
     {:ok, state}
   end
 
@@ -50,45 +51,139 @@ defmodule Cbreact.Process do
   end
   def handle_info({:hackney_response, ref, :done}, state) do
     %{"process" => process} = JSX.decode!(state[:json])
-    newstate = process
-    |> extract_modloads(state)
-    :gproc.reg({:p, :l, state[:sessionid]}, {state[:guid], state[:segment_id]})
+    newstate = state
+    |> extract_modloads(process)
+    |> extract_netconns(process)
+    |> extract_regmods(process)
+    |> extract_filemods(process)
+    |> extract_childprocs(process)
+    |> extract_crossprocs(process)
 
     {:noreply, newstate}
   end
 
-  def extract_modloads(%{"modload_count" => modload_count, "modload_complete" => modload_complete}, state) do
-#    Logger.debug(modload_count)
-    Enum.reduce(modload_complete, state, fn(x, acc) -> process_modload_line(x, acc) end)
-    |> HashDict.put(:modload_count_full, modload_count)
+  def extract_crossprocs(state, %{"crossproc_count" => crossproc_count, "crossproc_complete" => crossproc_complete}) do
+    Enum.map(crossproc_complete, &(process_crossproc_line(&1, state)))
+    HashDict.put(state, :crossproc_count_full, crossproc_count)
   end
-  def extract_modloads(%{"modload_count" => modload_count}, state) do
-    Logger.debug(modload_count)
+  def extract_childprocs(state, %{"childproc_count" => childproc_count, "childproc_complete" => childproc_complete}) do
+    Enum.map(childproc_complete, &(process_childproc_line(&1, state)))
+    HashDict.put(state, :childproc_count_full, childproc_count)
+  end
+  def extract_filemods(state, %{"filemod_count" => filemod_count, "filemod_complete" => filemod_complete}) do
+    Enum.map(filemod_complete, &(process_filemod_line(&1, state)))
+    HashDict.put(state, :filemod_count_full, filemod_count)
+  end
+  def extract_modloads(state, %{"modload_count" => modload_count, "modload_complete" => modload_complete}) do
+    Enum.map(modload_complete, &(process_modload_line(&1, state)))
+    HashDict.put(state, :modload_count_full, modload_count)
+  end
+  def extract_netconns(state, %{"netconn_count" => netconn_count, "netconn_complete" => netconn_complete}) do
+    Enum.map(netconn_complete, &(process_netconn_line(&1, state)))
+    HashDict.put(state, :netconn_count_full, netconn_count)
+  end
+  def extract_regmods(state, %{"regmod_count" => regmod_count, "regmod_complete" => regmod_complete}) do
+    Enum.map(regmod_complete, &(process_regmod_line(&1, state)))
+    HashDict.put(state, :regmod_count_full, regmod_count)
+  end
+  def extract_crossprocs(state, %{"crossproc_count" => crossproc_count}) do
+    HashDict.put(state, :crossproc_count_full, crossproc_count)
+  end
+  def extract_childprocs(state, %{"childproc_count" => childproc_count}) do
+    HashDict.put(state, :childproc_count_full, childproc_count)
+  end
+  def extract_filemods(state, %{"filemod_count" => filemod_count}) do
+    HashDict.put(state, :filemod_count_full, filemod_count)
+  end
+  def extract_regmods(state, %{"regmod_count" => regmod_count}) do
+    HashDict.put(state, :regmod_count_full, regmod_count)
+  end
+  def extract_modloads(state, %{"modload_count" => modload_count}) do
+    HashDict.put(state, :modload_count_full, modload_count)
+  end
+  def extract_netconns(state, %{"netconn_count" => netconn_count}) do
+    HashDict.put(state, :netconn_count_full, netconn_count)
+  end
+
+  def process_crossproc_line(string, state) do
+    [optype, datetime, targetguid, md5, childpath, subtype, privs, tamper] = String.split(string, "|")
+    [starttime, endtime] = state[:range]
+    eventtime = Timex.Parse.DateTime.Parser.parse(datetime<>"Z", "{ISOz}")
+    recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
+
+    case {(eventtime > starttime), (eventtime < endtime)} do
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:crossproc, {state[:guid], state[:segment_id]}, optype, targetguid, md5, childpath, subtype, privs, tamper}})
+      _-> :ok
+    end
+    state
+  end
+
+  def process_childproc_line(string, state) do
+    [datetime, childguid, md5, childpath, childpid, startend, tamper] = String.split(string, "|")
+    [starttime, endtime] = state[:range]
+    eventtime = Timex.Parse.DateTime.Parser.parse(datetime<>"Z", "{ISOz}")
+    recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
+
+    case {(eventtime > starttime), (eventtime < endtime)} do
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:childproc, {state[:guid], state[:segment_id]}, childguid, md5, childpath, childpid, startend, tamper}})
+      _-> :ok
+    end
+    state
+  end
+
+  def process_filemod_line(string, state) do
+    [operationtype, datetime, filepath, md5, filetype, tamper] = String.split(string, "|")
+    [starttime, endtime] = state[:range]
+    eventtime = Timex.Parse.DateTime.Parser.parse(datetime<>"Z", "{ISOz}")
+    recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
+
+    case {(eventtime > starttime), (eventtime < endtime)} do
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:filemod, {state[:guid], state[:segment_id]}, operationtype, filepath, md5, filetype, tamper}})
+      _-> :ok
+    end
+    state
+  end
+
+  def process_regmod_line(string, state) do
+    [operationtype, datetime, regpath, tamper] = String.split(string, "|")
+    [starttime, endtime] = state[:range]
+    eventtime = Timex.Parse.DateTime.Parser.parse(datetime<>"Z", "{ISOz}")
+    recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
+
+    case {(eventtime > starttime), (eventtime < endtime)} do
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:regmod, {state[:guid], state[:segment_id]}, operationtype, regpath, tamper}})
+      _-> :ok
+    end
+    state
   end
 
   def process_modload_line(string, state) do
     [datetime, md5, file] = String.split(string, "|")
     [starttime, endtime] = state[:range]
     eventtime = Timex.Parse.DateTime.Parser.parse(datetime<>"Z", "{ISOz}")
+    recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
 
-    ds = HashDict.get(state, :eventlist, HashDict.new)
-    newds =
-    case {(eventtime > starttime), (eventtime < endtime), HashDict.get(ds, datetime, [])} do
-      {true, true, []} -> [ {:modload, md5, file} ]
-      {true, true, pds} -> [ {:modload, md5, file} | pds ]
-      {_   , _   , pds} -> pds
+    case {(eventtime > starttime), (eventtime < endtime)} do
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:modload, {state[:guid], state[:segment_id]},md5, file}})
+       _-> :ok
     end
-
-    newdsx = HashDict.put(ds, datetime, newds)
-    Logger.debug(inspect(newdsx))
-    newstate = HashDict.put(state, :eventlist, newdsx)
+    state
   end
 
+  def process_netconn_line(%{"domain" => domain, "proto" => proto, "local_port" => local_port, "timestamp" => timestamp, "local_ip" => local_ip, "direction" => direction, "remote_port" => remote_port, "remote_ip" => remote_ip}, state) do
+    [starttime, endtime] = state[:range]
+    eventtime = Timex.Parse.DateTime.Parser.parse(timestamp, "{ISOz}")
 
+    case {(eventtime > starttime), (eventtime < endtime)} do
+      {true, true} -> :ets.insert(state[:sessionidevents], {timestamp, {:netconn, {state[:guid], state[:segment_id]}, domain, proto, local_port, local_ip, direction, remote_port, remote_ip}})
+      _ -> :ok
+    end
+  end
 
-
-
-
+  def set2events(sessionid) do
+    Atom.to_string(sessionid) <> "events"
+    |> String.to_atom
+  end
 
 
 end
