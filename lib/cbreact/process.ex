@@ -112,7 +112,7 @@ defmodule Cbreact.Process do
     recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
 
     case {(eventtime > starttime), (eventtime < endtime)} do
-      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:crossproc, {state[:guid], state[:segment_id]}, optype, targetguid, md5, childpath, subtype, privs, tamper}})
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:crossproc, {state[:guid], state[:segment_id]}, {optype, targetguid, md5, childpath, subtype, privs, tamper}}})
       _-> :ok
     end
     state
@@ -125,7 +125,7 @@ defmodule Cbreact.Process do
     recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
 
     case {(eventtime > starttime), (eventtime < endtime)} do
-      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:childproc, {state[:guid], state[:segment_id]}, childguid, md5, childpath, childpid, startend, tamper}})
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:childproc, {state[:guid], state[:segment_id]}, {childguid, md5, childpath, childpid, startend, tamper}}})
       _-> :ok
     end
     state
@@ -138,7 +138,7 @@ defmodule Cbreact.Process do
     recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
 
     case {(eventtime > starttime), (eventtime < endtime)} do
-      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:filemod, {state[:guid], state[:segment_id]}, operationtype, filepath, md5, filetype, tamper}})
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:filemod, {state[:guid], state[:segment_id]}, {operationtype, filepath, md5, filetype, tamper}}})
       _-> :ok
     end
     state
@@ -151,7 +151,7 @@ defmodule Cbreact.Process do
     recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
 
     case {(eventtime > starttime), (eventtime < endtime)} do
-      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:regmod, {state[:guid], state[:segment_id]}, operationtype, regpath, tamper}})
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:regmod, {state[:guid], state[:segment_id]}, {operationtype, regpath, tamper}}})
       _-> :ok
     end
     state
@@ -164,7 +164,7 @@ defmodule Cbreact.Process do
     recordts = Regex.replace(~r/ /, datetime, "T") <> "Z"
 
     case {(eventtime > starttime), (eventtime < endtime)} do
-      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:modload, {state[:guid], state[:segment_id]},md5, file}})
+      {true, true} -> :ets.insert(state[:sessionidevents], {recordts, {:modload, {state[:guid], state[:segment_id]},{md5, file}}})
        _-> :ok
     end
     state
@@ -175,7 +175,7 @@ defmodule Cbreact.Process do
     eventtime = Timex.Parse.DateTime.Parser.parse(timestamp, "{ISOz}")
 
     case {(eventtime > starttime), (eventtime < endtime)} do
-      {true, true} -> :ets.insert(state[:sessionidevents], {timestamp, {:netconn, {state[:guid], state[:segment_id]}, domain, proto, local_port, local_ip, direction, remote_port, remote_ip}})
+      {true, true} -> :ets.insert(state[:sessionidevents], {timestamp, {:netconn, {state[:guid], state[:segment_id]}, {domain, proto, local_port, local_ip, direction, remote_port, remote_ip}}})
       _ -> :ok
     end
   end
