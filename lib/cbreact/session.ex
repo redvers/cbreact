@@ -142,6 +142,17 @@ defmodule Cbreact.Session do
   end
 ################################################################################
 
+  def handle_cast(:pullsensordata, state) do
+    Logger.debug("Pulling sensordata")
+    url = "https://#{state[:cbclientapi].hostname}:#{state[:cbclientapi].port}/api/v1/sensor/#{state[:sensorid]}"
+    {:ok, 200, headers, bodyref} = :hackney.get(url, [{"X-Auth-Token", state[:cbclientapi].api}], '', [ssl_options: [insecure: true]])
+    {:ok, body} = :hackney.body(bodyref)
+    sensordata = JSX.decode!(body)
+    newstate = HashDict.put(state, :sensordata, sensordata)
+    :erlang.send_after(300000, self, :sensordata, [])
+    req_sensor_push(self)
+    {:noreply, newstate}
+  end
   def handle_cast(:pull_proclist, state) do
     [start, fin] = HashDict.get(state, :range)
     Logger.debug("Requesting count of processes: #{start} -> #{fin}")
@@ -149,15 +160,8 @@ defmodule Cbreact.Session do
     newstate = clear_storage(state)
     |> acquire_process_count
     |> acquire_process_list
-#    |> acquire_event_list
-
-
     {:noreply, newstate}
   end
-
-
-
-
 
   def handle_call({:set_range,[start, fin]}, _from, state) do
 #    {ok, d1} = Timex.Parse.DateTime.Parser.parse(start)
@@ -203,9 +207,16 @@ defmodule Cbreact.Session do
       |> HashDict.put(:range, ["2015-01-01 00:00:00", "2015-01-01 00:00:00"])
       |> HashDict.put(:cbclientapi, struct(Cbclientapi, Application.get_env(:cbclientapi, Cbclientapi)))
 
+#    :erlang.send_after(100, self, :pullsensordata, [])
+    GenServer.cast(self, :pullsensordata)
+
     {:ok, state}
   end
 
+  def handle_info(:pullsensordata, state) do
+    GenServer.cast(self, :pullsensordata)
+    {:noreply, state}
+  end
   def handle_info({:hackney_response, ref, string}, state) when is_binary(string) do
     :ets.insert(state[:sessionidbag], {ref, string})
     {:noreply, state}
@@ -257,4 +268,48 @@ defmodule Cbreact.Session do
     |> String.to_atom
   end
 
+  def req_sensor_push(pid) do
+    GenServer.cast(pid, :push_sensordata)
+  end
+
+  def handle_cast(:push_sensordata, state) do
+    sdaatomic = state[:sensordata]
+    |> Enum.map(fn({key, value}) -> {String.to_atom(key), value} end)
+
+    str0 = struct(CbStruct.CbSensor, sdaatomic)
+    str1 = %{str0 | clock_delta: String.to_integer(str0.clock_delta)}
+    str2 = %{str1 | sensor_uptime: String.to_integer(str0.sensor_uptime)}
+    str3 = %{str2 | uptime: String.to_integer(str0.uptime)}
+    str4 = %{str3 | num_storefiles_bytes: String.to_integer(str0.num_storefiles_bytes)}
+    pushstruct = %{str4 | num_eventlog_bytes: String.to_integer(str0.num_eventlog_bytes)}
+    
+
+    Cbreact.CbreactChannel.push_sensor_update(state[:sessionid], :sensorupdate, pushstruct)
+
+    {:noreply, state}
+  end
+
 end
+
+defmodule CbStruct.CbSensor do
+  defstruct id: 0,
+    computer_name: "none",
+    os_environment_display_string: "none",
+    clock_delta: 0,
+    uptime: 0,
+    sensor_uptime: 0,
+    last_update: "none",
+    status: "none",
+    num_eventlog_bytes: 0,
+    build_version_string: "none",
+    network_adapters: [],
+    registration_time: "none",
+    last_checkin_time: "none",
+    next_checkin_time: "none",
+    group_id: 0,
+    num_storefiles_bytes: 0
+end
+            
+
+
+

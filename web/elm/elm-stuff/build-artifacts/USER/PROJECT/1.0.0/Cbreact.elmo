@@ -1,0 +1,338 @@
+Elm.Cbreact = Elm.Cbreact || {};
+Elm.Cbreact.make = function (_elm) {
+   "use strict";
+   _elm.Cbreact = _elm.Cbreact || {};
+   if (_elm.Cbreact.values)
+   return _elm.Cbreact.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Cbreact",
+   $Basics = Elm.Basics.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var cbsensor = Elm.Native.Port.make(_elm).inboundSignal("cbsensor",
+   "Cbreact.CbSensor",
+   function (v) {
+      return typeof v === "object" && "id" in v && "computer_name" in v && "os_environment_display_string" in v && "clock_delta" in v && "uptime" in v && "sensor_uptime" in v && "last_update" in v && "status" in v && "num_eventlog_bytes" in v && "build_version_string" in v && "registration_time" in v && "last_checkin_time" in v && "next_checkin_time" in v && "group_id" in v && "num_storefiles_bytes" in v ? {_: {}
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,id: typeof v.id === "number" ? v.id : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.id)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,computer_name: typeof v.computer_name === "string" || typeof v.computer_name === "object" && v.computer_name instanceof String ? v.computer_name : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.computer_name)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,os_environment_display_string: typeof v.os_environment_display_string === "string" || typeof v.os_environment_display_string === "object" && v.os_environment_display_string instanceof String ? v.os_environment_display_string : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.os_environment_display_string)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,clock_delta: typeof v.clock_delta === "number" ? v.clock_delta : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.clock_delta)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,uptime: typeof v.uptime === "number" ? v.uptime : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.uptime)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,sensor_uptime: typeof v.sensor_uptime === "number" ? v.sensor_uptime : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.sensor_uptime)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,last_update: typeof v.last_update === "string" || typeof v.last_update === "object" && v.last_update instanceof String ? v.last_update : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.last_update)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,status: typeof v.status === "string" || typeof v.status === "object" && v.status instanceof String ? v.status : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.status)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,num_eventlog_bytes: typeof v.num_eventlog_bytes === "number" ? v.num_eventlog_bytes : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.num_eventlog_bytes)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,build_version_string: typeof v.build_version_string === "string" || typeof v.build_version_string === "object" && v.build_version_string instanceof String ? v.build_version_string : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.build_version_string)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,registration_time: typeof v.registration_time === "string" || typeof v.registration_time === "object" && v.registration_time instanceof String ? v.registration_time : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.registration_time)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,last_checkin_time: typeof v.last_checkin_time === "string" || typeof v.last_checkin_time === "object" && v.last_checkin_time instanceof String ? v.last_checkin_time : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.last_checkin_time)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,next_checkin_time: typeof v.next_checkin_time === "string" || typeof v.next_checkin_time === "object" && v.next_checkin_time instanceof String ? v.next_checkin_time : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.next_checkin_time)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,group_id: typeof v.group_id === "number" ? v.group_id : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.group_id)
+                                                                                                                                                                                                                                                                                                                                                                                                                          ,num_storefiles_bytes: typeof v.num_storefiles_bytes === "number" ? v.num_storefiles_bytes : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                          v.num_storefiles_bytes)} : _U.badPort("an object with fields `id`, `computer_name`, `os_environment_display_string`, `clock_delta`, `uptime`, `sensor_uptime`, `last_update`, `status`, `num_eventlog_bytes`, `build_version_string`, `registration_time`, `last_checkin_time`, `next_checkin_time`, `group_id`, `num_storefiles_bytes`",
+      v);
+   });
+   var cbev = Elm.Native.Port.make(_elm).inboundSignal("cbev",
+   "Cbreact.Model",
+   function (v) {
+      return typeof v === "object" && "sensorList" in v && "procList" in v && "eventList" in v && "sessionRange" in v ? {_: {}
+                                                                                                                        ,sensorList: typeof v.sensorList === "object" && v.sensorList instanceof Array ? Elm.Native.List.make(_elm).fromArray(v.sensorList.map(function (v) {
+                                                                                                                           return typeof v === "object" && "id" in v && "computer_name" in v && "os_environment_display_string" in v && "clock_delta" in v && "uptime" in v && "sensor_uptime" in v && "last_update" in v && "status" in v && "num_eventlog_bytes" in v && "build_version_string" in v && "registration_time" in v && "last_checkin_time" in v && "next_checkin_time" in v && "group_id" in v && "num_storefiles_bytes" in v ? {_: {}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,id: typeof v.id === "number" ? v.id : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.id)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,computer_name: typeof v.computer_name === "string" || typeof v.computer_name === "object" && v.computer_name instanceof String ? v.computer_name : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.computer_name)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,os_environment_display_string: typeof v.os_environment_display_string === "string" || typeof v.os_environment_display_string === "object" && v.os_environment_display_string instanceof String ? v.os_environment_display_string : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.os_environment_display_string)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,clock_delta: typeof v.clock_delta === "number" ? v.clock_delta : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.clock_delta)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,uptime: typeof v.uptime === "number" ? v.uptime : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.uptime)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,sensor_uptime: typeof v.sensor_uptime === "number" ? v.sensor_uptime : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.sensor_uptime)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,last_update: typeof v.last_update === "string" || typeof v.last_update === "object" && v.last_update instanceof String ? v.last_update : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.last_update)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,status: typeof v.status === "string" || typeof v.status === "object" && v.status instanceof String ? v.status : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.status)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,num_eventlog_bytes: typeof v.num_eventlog_bytes === "number" ? v.num_eventlog_bytes : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.num_eventlog_bytes)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,build_version_string: typeof v.build_version_string === "string" || typeof v.build_version_string === "object" && v.build_version_string instanceof String ? v.build_version_string : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.build_version_string)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,registration_time: typeof v.registration_time === "string" || typeof v.registration_time === "object" && v.registration_time instanceof String ? v.registration_time : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.registration_time)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,last_checkin_time: typeof v.last_checkin_time === "string" || typeof v.last_checkin_time === "object" && v.last_checkin_time instanceof String ? v.last_checkin_time : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.last_checkin_time)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,next_checkin_time: typeof v.next_checkin_time === "string" || typeof v.next_checkin_time === "object" && v.next_checkin_time instanceof String ? v.next_checkin_time : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.next_checkin_time)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,group_id: typeof v.group_id === "number" ? v.group_id : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.group_id)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               ,num_storefiles_bytes: typeof v.num_storefiles_bytes === "number" ? v.num_storefiles_bytes : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               v.num_storefiles_bytes)} : _U.badPort("an object with fields `id`, `computer_name`, `os_environment_display_string`, `clock_delta`, `uptime`, `sensor_uptime`, `last_update`, `status`, `num_eventlog_bytes`, `build_version_string`, `registration_time`, `last_checkin_time`, `next_checkin_time`, `group_id`, `num_storefiles_bytes`",
+                                                                                                                           v);
+                                                                                                                        })) : _U.badPort("an array",
+                                                                                                                        v.sensorList)
+                                                                                                                        ,procList: typeof v.procList === "object" && v.procList instanceof Array ? Elm.Native.List.make(_elm).fromArray(v.procList.map(function (v) {
+                                                                                                                           return typeof v === "object" && "guid" in v && "cmdline" in v && "sensor_id" in v && "username" in v ? {_: {}
+                                                                                                                                                                                                                                  ,guid: typeof v.guid === "string" || typeof v.guid === "object" && v.guid instanceof String ? v.guid : _U.badPort("a string",
+                                                                                                                                                                                                                                  v.guid)
+                                                                                                                                                                                                                                  ,cmdline: typeof v.cmdline === "string" || typeof v.cmdline === "object" && v.cmdline instanceof String ? v.cmdline : _U.badPort("a string",
+                                                                                                                                                                                                                                  v.cmdline)
+                                                                                                                                                                                                                                  ,sensor_id: typeof v.sensor_id === "number" ? v.sensor_id : _U.badPort("a number",
+                                                                                                                                                                                                                                  v.sensor_id)
+                                                                                                                                                                                                                                  ,username: typeof v.username === "string" || typeof v.username === "object" && v.username instanceof String ? v.username : _U.badPort("a string",
+                                                                                                                                                                                                                                  v.username)} : _U.badPort("an object with fields `guid`, `cmdline`, `sensor_id`, `username`",
+                                                                                                                           v);
+                                                                                                                        })) : _U.badPort("an array",
+                                                                                                                        v.procList)
+                                                                                                                        ,eventList: typeof v.eventList === "object" && v.eventList instanceof Array ? Elm.Native.List.make(_elm).fromArray(v.eventList.map(function (v) {
+                                                                                                                           return typeof v === "object" && "evId" in v && "procguid" in v && "timestamp" in v && "domain" in v && "proto" in v && "local_ip" in v && "local_port" in v && "direction" in v && "remote_ip" in v && "remote_port" in v ? {_: {}
+                                                                                                                                                                                                                                                                                                                                                       ,evId: typeof v.evId === "number" ? v.evId : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                       v.evId)
+                                                                                                                                                                                                                                                                                                                                                       ,procguid: typeof v.procguid === "string" || typeof v.procguid === "object" && v.procguid instanceof String ? v.procguid : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                       v.procguid)
+                                                                                                                                                                                                                                                                                                                                                       ,timestamp: typeof v.timestamp === "string" || typeof v.timestamp === "object" && v.timestamp instanceof String ? v.timestamp : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                       v.timestamp)
+                                                                                                                                                                                                                                                                                                                                                       ,domain: typeof v.domain === "string" || typeof v.domain === "object" && v.domain instanceof String ? v.domain : _U.badPort("a string",
+                                                                                                                                                                                                                                                                                                                                                       v.domain)
+                                                                                                                                                                                                                                                                                                                                                       ,proto: typeof v.proto === "number" ? v.proto : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                       v.proto)
+                                                                                                                                                                                                                                                                                                                                                       ,local_ip: typeof v.local_ip === "number" ? v.local_ip : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                       v.local_ip)
+                                                                                                                                                                                                                                                                                                                                                       ,local_port: typeof v.local_port === "number" ? v.local_port : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                       v.local_port)
+                                                                                                                                                                                                                                                                                                                                                       ,direction: typeof v.direction === "boolean" ? v.direction : _U.badPort("a boolean (true or false)",
+                                                                                                                                                                                                                                                                                                                                                       v.direction)
+                                                                                                                                                                                                                                                                                                                                                       ,remote_ip: typeof v.remote_ip === "number" ? v.remote_ip : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                       v.remote_ip)
+                                                                                                                                                                                                                                                                                                                                                       ,remote_port: typeof v.remote_port === "number" ? v.remote_port : _U.badPort("a number",
+                                                                                                                                                                                                                                                                                                                                                       v.remote_port)} : _U.badPort("an object with fields `evId`, `procguid`, `timestamp`, `domain`, `proto`, `local_ip`, `local_port`, `direction`, `remote_ip`, `remote_port`",
+                                                                                                                           v);
+                                                                                                                        })) : _U.badPort("an array",
+                                                                                                                        v.eventList)
+                                                                                                                        ,sessionRange: typeof v.sessionRange === "object" && v.sessionRange instanceof Array ? Elm.Native.List.make(_elm).fromArray(v.sessionRange.map(function (v) {
+                                                                                                                           return typeof v === "string" || typeof v === "object" && v instanceof String ? v : _U.badPort("a string",
+                                                                                                                           v);
+                                                                                                                        })) : _U.badPort("an array",
+                                                                                                                        v.sessionRange)} : _U.badPort("an object with fields `sensorList`, `procList`, `eventList`, `sessionRange`",
+      v);
+   });
+   var cbprocfn = function (cbproc) {
+      return A2($Html.li,
+      _L.fromArray([]),
+      _L.fromArray([$Html.text($Basics.toString(cbproc))]));
+   };
+   var cbsensorfn = function (cbsensor) {
+      return A2($Html.li,
+      _L.fromArray([]),
+      _L.fromArray([$Html.text($Basics.toString(cbsensor))]));
+   };
+   var cbeventfn = function (cbevent) {
+      return A2($Html.li,
+      _L.fromArray([]),
+      _L.fromArray([$Html.text($Basics.toString(cbevent))]));
+   };
+   var view = function (model) {
+      return A2($Html.div,
+      _L.fromArray([]),
+      _L.fromArray([A2($Html.ul,
+                   _L.fromArray([]),
+                   A2($List.map,
+                   cbsensorfn,
+                   model.sensorList))
+                   ,A2($Html.ul,
+                   _L.fromArray([]),
+                   A2($List.map,
+                   cbprocfn,
+                   model.procList))
+                   ,A2($Html.ul,
+                   _L.fromArray([]),
+                   A2($List.map,
+                   cbeventfn,
+                   model.eventList))]));
+   };
+   var update = F2(function (action,
+   model) {
+      return function () {
+         switch (action.ctor)
+         {case "AddSensor":
+            return _U.replace([["sensorList"
+                               ,A2($Basics._op["++"],
+                               model.sensorList,
+                               _L.fromArray([action._0]))]],
+              model);
+            case "EvUpdate":
+            return action._0;
+            case "NoOp": return model;}
+         _U.badCase($moduleName,
+         "between lines 69 and 77");
+      }();
+   });
+   var AddSensor = function (a) {
+      return {ctor: "AddSensor"
+             ,_0: a};
+   };
+   var cbportfn = A2($Signal.map,
+   AddSensor,
+   cbsensor);
+   var EvUpdate = function (a) {
+      return {ctor: "EvUpdate"
+             ,_0: a};
+   };
+   var cbevfn = A2($Signal.map,
+   EvUpdate,
+   cbev);
+   var actions = A2($Signal.merge,
+   cbportfn,
+   cbevfn);
+   var NoOp = {ctor: "NoOp"};
+   var inbox = $Signal.mailbox(NoOp);
+   var initialModel = {_: {}
+                      ,eventList: _L.fromArray([])
+                      ,procList: _L.fromArray([])
+                      ,sensorList: _L.fromArray([])
+                      ,sessionRange: _L.fromArray([])};
+   var model = A3($Signal.foldp,
+   update,
+   initialModel,
+   actions);
+   var main = A2($Signal.map,
+   view,
+   model);
+   var Model = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,eventList: c
+             ,procList: b
+             ,sensorList: a
+             ,sessionRange: d};
+   });
+   var CbEventNetconn = function (a) {
+      return function (b) {
+         return function (c) {
+            return function (d) {
+               return function (e) {
+                  return function (f) {
+                     return function (g) {
+                        return function (h) {
+                           return function (i) {
+                              return function (j) {
+                                 return {_: {}
+                                        ,direction: h
+                                        ,domain: d
+                                        ,evId: a
+                                        ,local_ip: f
+                                        ,local_port: g
+                                        ,procguid: b
+                                        ,proto: e
+                                        ,remote_ip: i
+                                        ,remote_port: j
+                                        ,timestamp: c};
+                              };
+                           };
+                        };
+                     };
+                  };
+               };
+            };
+         };
+      };
+   };
+   var CbProc = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,cmdline: b
+             ,guid: a
+             ,sensor_id: c
+             ,username: d};
+   });
+   var CbSensor = function (a) {
+      return function (b) {
+         return function (c) {
+            return function (d) {
+               return function (e) {
+                  return function (f) {
+                     return function (g) {
+                        return function (h) {
+                           return function (i) {
+                              return function (j) {
+                                 return function (k) {
+                                    return function (l) {
+                                       return function (m) {
+                                          return function (n) {
+                                             return function (o) {
+                                                return {_: {}
+                                                       ,build_version_string: j
+                                                       ,clock_delta: d
+                                                       ,computer_name: b
+                                                       ,group_id: n
+                                                       ,id: a
+                                                       ,last_checkin_time: l
+                                                       ,last_update: g
+                                                       ,next_checkin_time: m
+                                                       ,num_eventlog_bytes: i
+                                                       ,num_storefiles_bytes: o
+                                                       ,os_environment_display_string: c
+                                                       ,registration_time: k
+                                                       ,sensor_uptime: f
+                                                       ,status: h
+                                                       ,uptime: e};
+                                             };
+                                          };
+                                       };
+                                    };
+                                 };
+                              };
+                           };
+                        };
+                     };
+                  };
+               };
+            };
+         };
+      };
+   };
+   _elm.Cbreact.values = {_op: _op
+                         ,CbSensor: CbSensor
+                         ,CbProc: CbProc
+                         ,CbEventNetconn: CbEventNetconn
+                         ,Model: Model
+                         ,initialModel: initialModel
+                         ,NoOp: NoOp
+                         ,EvUpdate: EvUpdate
+                         ,AddSensor: AddSensor
+                         ,update: update
+                         ,view: view
+                         ,cbeventfn: cbeventfn
+                         ,cbsensorfn: cbsensorfn
+                         ,cbprocfn: cbprocfn
+                         ,inbox: inbox
+                         ,cbportfn: cbportfn
+                         ,cbevfn: cbevfn
+                         ,actions: actions
+                         ,model: model
+                         ,main: main};
+   return _elm.Cbreact.values;
+};

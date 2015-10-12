@@ -7,7 +7,7 @@ defmodule Cbreact.Session.Supervisor do
   end
 
   def start_child(sensorid) do
-    sessionid = String.to_atom("Session:#{:erlang.system_time}")
+    sessionid = String.to_atom("Session#{:erlang.system_time}")
     Supervisor.start_child(__MODULE__, worker(Cbreact.Session, [sensorid, sessionid], id: sessionid))
   end
 

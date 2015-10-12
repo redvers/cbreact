@@ -3,6 +3,7 @@ defmodule Cbreact.UserSocket do
 
   ## Channels
   # channel "rooms:*", Cbreact.RoomChannel
+  channel "cbreact:*", Cbreact.CbreactChannel
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket
