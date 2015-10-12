@@ -36,6 +36,11 @@ defmodule Cbreact.CbreactChannel do
     {:noreply, socket}
   end
 
+  def push_sensor_update(sessionid, :debuglogs, data) do
+    channel = "cbreact:#{Atom.to_string(sessionid)}"
+    Logger.debug("Pushing sensorUpdate: #{channel} #{inspect(data)}")
+    Cbreact.Endpoint.broadcast(channel, "debuglogs", data)
+  end
   def push_sensor_update(sessionid, :sensorupdate, data) do
     channel = "cbreact:#{Atom.to_string(sessionid)}"
     Logger.debug("Pushing sensorUpdate: #{channel} #{inspect(data)}")

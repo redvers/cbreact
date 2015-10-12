@@ -6,6 +6,7 @@ var elmDiv = document.getElementById("elm-main"),
     cbev: {
       sensorList: [],
       procList: [],
+      statusScroll: ["initian cbev"],
       eventList: [],
       sessionRange: []
     },
@@ -25,7 +26,8 @@ var elmDiv = document.getElementById("elm-main"),
       next_checkin_time: "none",
       group_id: 0,
       num_storefiles_bytes: 0
-    }
+    },
+	cbdebug: "initial cbdebug"
   }
 );
 
@@ -35,6 +37,7 @@ channel.join()
           elmApp.ports.cbev.send({
               sensorList: [],
               procList: [],
+              statusScroll: ["onjoin channel"],
               eventList: [],
               sessionRange: []
           });
@@ -49,6 +52,10 @@ channel.join()
 				newchannel.on("sensorUpdate", payload => {
 					console.log("Got sensor notification", payload);
 					elmApp.ports.cbsensor.send(payload);
+				});
+				newchannel.on("debuglogs", payload => {
+					console.log("Got debug notification", payload);
+					elmApp.ports.cbdebug.send(payload.message);
 				});
 
 

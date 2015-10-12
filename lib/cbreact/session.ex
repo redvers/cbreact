@@ -57,7 +57,7 @@ defmodule Cbreact.Session do
     {:ok, 200, headers, bodyref} = :hackney.get(url, [{"X-Auth-Token", state[:cbclientapi].api}], '', [ssl_options: [insecure: true]])
     {:ok, body} = :hackney.body(bodyref)
     %{"total_results" => count} = JSX.decode!(body)
-    Logger.debug("Total number of in-scope processes, #{count}")
+    webdebug(state, "Total number of in-scope processes, #{count}")
 
     :ets.insert(state[:sessionid], {:process_summary_count, count})
     HashDict.put(state, :process_count, count)
@@ -69,7 +69,7 @@ defmodule Cbreact.Session do
     sensorid = HashDict.get(state, :sensorid)
     process_count = HashDict.get(state, :process_count)
     [start, fin] = HashDict.get(state, :range)
-    Logger.debug("Pagesize = #{@pagesize}")
+    webdebug(state, "Pagesize = #{@pagesize}")
 
     numpages = div(process_count, @pagesize)
     :ets.insert(state[:sessionid], {:summary_pages, (numpages+1)})
@@ -112,7 +112,7 @@ defmodule Cbreact.Session do
     :ets.update_counter(state[:sessionid], :netconn_count,         {2, netconn_count})
     :ets.update_counter(state[:sessionid], :regmod_count,          {2, regmod_count})
     lastupdatecount = :ets.update_counter(state[:sessionid], :process_summary_count, {2, -1})
-    Logger.debug("process_summary_status_count: #{lastupdatecount}")
+    webdebug(state, "process_summary_status_count: #{lastupdatecount}")
 
     [ {id, segment_id} | acc ]
 
@@ -143,7 +143,7 @@ defmodule Cbreact.Session do
 ################################################################################
 
   def handle_cast(:pullsensordata, state) do
-    Logger.debug("Pulling sensordata")
+    webdebug(state, "Pulling sensordata")
     url = "https://#{state[:cbclientapi].hostname}:#{state[:cbclientapi].port}/api/v1/sensor/#{state[:sensorid]}"
     {:ok, 200, headers, bodyref} = :hackney.get(url, [{"X-Auth-Token", state[:cbclientapi].api}], '', [ssl_options: [insecure: true]])
     {:ok, body} = :hackney.body(bodyref)
@@ -155,7 +155,7 @@ defmodule Cbreact.Session do
   end
   def handle_cast(:pull_proclist, state) do
     [start, fin] = HashDict.get(state, :range)
-    Logger.debug("Requesting count of processes: #{start} -> #{fin}")
+    webdebug(state, "Requesting count of processes: #{start} -> #{fin}")
 
     newstate = clear_storage(state)
     |> acquire_process_count
@@ -288,6 +288,14 @@ defmodule Cbreact.Session do
 
     {:noreply, state}
   end
+
+  def webdebug(state, message) do
+    rendermsg = inspect(message)
+    Logger.debug(rendermsg)
+    Cbreact.CbreactChannel.push_sensor_update(state[:sessionid], :debuglogs, %{message: rendermsg})
+    state
+  end
+
 
 end
 

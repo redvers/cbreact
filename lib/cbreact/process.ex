@@ -22,13 +22,13 @@ defmodule Cbreact.Process do
   end
 
   def handle_cast(:pull, state) do
-    Logger.debug("Receieved pull request for #{state[:guid]}")
+    webdebug(state, "Receieved pull request for #{state[:guid]}")
     url = "https://#{state[:cbclientapi].hostname}:#{state[:cbclientapi].port}/api/v2/process/#{state[:guid]}/#{state[:segment_id]}/event"
     case :hackney.get(url, [{"X-Auth-Token", state[:cbclientapi].api}], '', [ssl_options: [insecure: true], async: true, pool: :cbpool]) do
       {:ok, ref} -> newstate = HashDict.put(state, :status, {:requested, ref})
                                |> HashDict.put(:json, "")
                     {:noreply, newstate}
-      {:error, error} -> Logger.debug("Unable to request hackney from pool #{inspect(error)}, re-requesting")
+      {:error, error} -> webdebug(state, "Unable to request hackney from pool #{inspect(error)}, re-requesting")
                                     GenServer.cast(self, :pull)
                                     {:noreply, state}
     end
@@ -39,7 +39,7 @@ defmodule Cbreact.Process do
     {:noreply, newstate}
   end
   def handle_info({:hackney_response, _ref, error = {:error, _}}, state) do
-    Logger.debug("I failed my network connection with #{inspect(error)}")
+    webdebug(state, "I failed my network connection with #{inspect(error)}")
     GenServer.cast(self, :pull)
     {:noreply, state}
   end
@@ -183,6 +183,13 @@ defmodule Cbreact.Process do
   def set2events(sessionid) do
     Atom.to_string(sessionid) <> "events"
     |> String.to_atom
+  end
+
+  def webdebug(state, message) do
+    rendermsg = inspect(message)
+    Logger.debug(rendermsg)
+    Cbreact.CbreactChannel.push_sensor_update(state[:sessionid], :debuglogs, %{message: rendermsg})
+    state
   end
 
 

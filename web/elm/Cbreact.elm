@@ -32,6 +32,7 @@ type alias CbProc =
     username : String
   }
     
+type alias ScrollData = String
 type alias CbEventNetconn =
   { evId : Int,
     procguid : String,
@@ -48,6 +49,7 @@ type alias Model =
   {
     sensorList : List CbSensor,
     procList : List CbProc,
+    statusScroll : List ScrollData,
     eventList : List CbEventNetconn,
     sessionRange : List String
   }
@@ -57,12 +59,13 @@ initialModel =
     {
       sensorList = [],
       procList = [],
+      statusScroll = ["Hello World"], 
       eventList = [],
       sessionRange = []
     }
 
 -- UPDATE
-type Action = NoOp | EvUpdate Model | AddSensor CbSensor
+type Action = NoOp | EvUpdate Model | AddSensor CbSensor | DebugLogs ScrollData
 
 update : Action -> Model -> Model
 update action model =
@@ -71,6 +74,10 @@ update action model =
       model
     EvUpdate cbev ->
       cbev
+    DebugLogs cbdebug ->
+      { model |
+        statusScroll <- model.statusScroll ++ [ cbdebug ]
+      }
     AddSensor cbsensor ->
       { model |
         sensorList <- model.sensorList ++ [ cbsensor ] 
@@ -83,8 +90,13 @@ view model =
   div [] [
     ul [] ( List.map cbsensorfn model.sensorList ),
     ul [] ( List.map cbprocfn model.procList ),
-    ul [] ( List.map cbeventfn model.eventList )
+    ul [] ( List.map cbeventfn model.eventList ),
+    ul [] ( List.map cbdebfn model.statusScroll )
   ]
+
+cbdebfn : ScrollData -> Html
+cbdebfn scrollData =
+   li [] [ text (toString scrollData) ]
 
 cbeventfn : CbEventNetconn -> Html
 cbeventfn cbevent =
@@ -101,13 +113,18 @@ cbprocfn cbproc =
 -- PORTS
 port cbev : Signal Model
 port cbsensor : Signal CbSensor
+port cbdebug : Signal ScrollData
 
 
 -- SIGNALS
--- type Action = NoOp | EvUpdate Model | AddSensor CbSensor
+--type Action = NoOp | EvUpdate Model | AddSensor CbSensor | DebugLogs ScrollData
 inbox : Signal.Mailbox Action
 inbox =
   Signal.mailbox NoOp
+
+cbdebugfn : Signal Action
+cbdebugfn =
+  Signal.map DebugLogs cbdebug
 
 cbportfn : Signal Action
 cbportfn =
@@ -119,7 +136,7 @@ cbevfn =
 
 actions : Signal Action
 actions =
-  Signal.merge cbportfn cbevfn
+  Signal.mergeMany [ cbportfn, cbevfn, cbdebugfn ]
 
 model : Signal Model
 model =
